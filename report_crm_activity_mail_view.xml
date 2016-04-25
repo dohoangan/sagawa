@@ -24,24 +24,24 @@
                     </div>
                 </div>
 
-                <table class="table table-condensed">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Activity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr t-foreach="get_lines" t-as="line">
-                            <td>
-                                <t t-esc="line[0]"/>
-                            </td>
-                            <td>
-                                <t t-raw="line[1]"/>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <t t-foreach="get_lines" t-as="line">
+                   <h2><t t-esc="line"/></h2>
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="line_value" t-as="line_value">
+                                <td><t t-esc="line_value['date']"/></td>
+                                <td><t t-raw="line_value['body']"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+
 
             </div>
         </t>

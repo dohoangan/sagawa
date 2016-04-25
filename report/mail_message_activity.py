@@ -2,7 +2,7 @@
 
 import time
 from openerp import api, models, _
-
+from collections import defaultdict
 
 class ReportCrmActivityMail (models.AbstractModel):
 
@@ -10,8 +10,14 @@ class ReportCrmActivityMail (models.AbstractModel):
 
     def _get_lines(self, form):
         cr = self.env.cr
-        cr.execute('SELECT create_date as date, body as body, res_id as id FROM mail_message WHERE model = %s and create_date >= %s and create_date <= %s and subtype_id in %s and create_uid = %s', ('crm.lead', form['date1'], form['date2'],(3,4,5),self.env.uid))
-        return cr.fetchall()
+        cr.execute('SELECT crm_lead.name as name, mail_message.create_date as date, mail_message.body as body FROM mail_message JOIN crm_lead ON crm_lead.id = mail_message.res_id WHERE mail_message.model = %s and mail_message.create_date >= %s and mail_message.create_date <= %s and mail_message.subtype_id in %s and mail_message.create_uid = %s', ('crm.lead', form['date1'], form['date2'],(3,4,5),self.env.uid))
+        messages = cr.dictfetchall()
+        messages_by_lead_name = defaultdict(list)
+        for message in messages:
+            messages_by_lead_name[message['name']].append({'date': message['date'], 'body': message['body']})
+        return messages_by_lead_name
+
+
 
     @api.multi
     def render_html(self, data):
