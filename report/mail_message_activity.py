@@ -10,7 +10,12 @@ class ReportCrmActivityMail (models.AbstractModel):
 
     def _get_lines(self, form):
         cr = self.env.cr
-        cr.execute('SELECT crm_lead.name as name, mail_message.create_date as date, mail_message.body as body FROM mail_message JOIN crm_lead ON crm_lead.id = mail_message.res_id WHERE mail_message.model = %s and mail_message.create_date >= %s and mail_message.create_date <= %s and mail_message.subtype_id in %s and mail_message.create_uid = %s', ('crm.lead', form['date1'], form['date2'],(3,4,5),self.env.uid))
+        cr.execute('SELECT crm_activity.subtype_id FROM crm_activity')
+        subtypes = cr.dictfetchall()
+        subtypes_ids = [subtype['subtype_id'] for subtype in subtypes]
+        if not subtypes_ids:
+            return []
+        cr.execute('SELECT crm_lead.name as name, mail_message.create_date as date, mail_message.body as body FROM mail_message JOIN crm_lead ON crm_lead.id = mail_message.res_id WHERE mail_message.model = %s and mail_message.create_date >= %s and mail_message.create_date <= %s and mail_message.subtype_id in %s  and mail_message.create_uid = %s', ('crm.lead', form['date1'], form['date2'],tuple(subtypes_ids), self.env.uid))
         messages = cr.dictfetchall()
         messages_by_lead_name = defaultdict(list)
         for message in messages:
